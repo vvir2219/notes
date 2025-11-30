@@ -36,7 +36,7 @@ notebook_path() {
 
     [ ! -r "$NOTES_PATH/$notebook" ] && die "notebook $notebook does not exist"
 
-    echo "$NOTES_PATH/$notebook"
+    echo -n "$NOTES_PATH/$notebook"
 }
 
 notebook_edit() {
