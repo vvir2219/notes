@@ -1,10 +1,42 @@
 #compdef notes
 
-_arguments \
-  '*:script:->scripts'
+_arguments -C \
+  '1:command:->cmd' \
+  '2:arg:->arg'
 
 case $state in
-  scripts)
-    _wanted scripts expl 'available scripts' compadd -- $(run_script)
+  cmd)
+    local -a _descriptions _values
+
+    _descriptions=(
+      'help            -- print the help'
+      'list            -- list notebooks'
+      'path <notebook> -- shows the path of <notebook>'
+      'edit <notebook> -- edit <notebook>'
+      'new  <notebook> -- creates a new notebook'
+    )
+
+    _values=(
+      'help'
+      'list'
+      'path'
+      'edit'
+      'new'
+    )
+
+    # Vertical window completion
+    compadd -l -d _descriptions -a _values
+    ;;
+
+  arg)
+    case $words[2] in
+      help|list|new) return 0 ;;
+      path|edit)
+        # These commands take a notebook → complete notebooks
+        local -a notebooks
+        notebooks=("${(@f)$(notes list)}")
+        compadd -l -- $notebooks
+        ;;
+    esac
     ;;
 esac

@@ -1,22 +1,27 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 
 set -e
 
 help() {
-    >&2 echo "Usage: $0 [command]"
+    >&2 echo "Usage: $(basename $0) [command]"
     >&2 echo ""
     >&2 echo "Commands:"
     >&2 echo "   help : prints this help"
     >&2 echo "   list : lists notebooks"
     >&2 echo "   path <notebook> : gives the path to the notebook"
     >&2 echo "   edit <notebook> : opens the notebook in $EDITOR"
+    >&2 echo "   new  <notebook> : creates a new notebook <notebook>"
 }
 
 die() {
-    while [ $# -gt 0 ]; do
-        >&2 echo $1
-        shift
-    done
+    if [ $# -gt 0 ]; then
+        >&2 echo -n $'\e[31m'
+        while [ $# -gt 0 ]; do
+            >&2 echo $1
+            shift
+        done
+        >&2 echo $'\e[0m'
+    fi
     help
     exit 1
 }
@@ -25,16 +30,41 @@ list_notebooks() {
     ls $NOTES_PATH
 }
 
+notebook_path() {
+    [ $# -eq 0 ] && die "missing notebook argument"
+    notebook="$1"; shift
+
+    [ ! -r "$NOTES_PATH/$notebook" ] && die "notebook $notebook does not exist"
+
+    echo "$NOTES_PATH/$notebook"
+}
+
+notebook_edit() {
+    notebook="$(notebook_path $@)"
+    $EDITOR $notebook
+}
+
+notebook_new() {
+    [ $# -eq 0 ] && die "missing notebook argument"
+    notebook="$1"; shift
+
+    [ -f "$NOTES_PATH/$notebook" ] && die "file $NOTES_PATH/$notebook already exists"
+
+    touch "$NOTES_PATH/$notebook"
+    echo "notebook $notebook created"
+}
+
 dispatch() {
     [ $# -eq 0 ] && die
 
-    command="$1"
+    command="$1"; shift
     case "$command" in
         help) die ;;
         list) list_notebooks "$@" ;;
         path) notebook_path "$@" ;;
         edit) notebook_edit "$@" ;;
-        *) die "Unknown command $command";;
+        new) notebook_new "$@" ;;
+        *) die "Unknown command: $command";;
     esac
 }
 
