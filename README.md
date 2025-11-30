@@ -1,7 +1,7 @@
 # Notes
 
 Simple note taking utilitary.
-Notes reside in `NOTES_PATH` environmental variable, by default `$HOME/.notes`
+Notes path is taken from `NOTES_PATH` environmental variable, by default `$HOME/.notes`
 
 ## Instalation
 
